@@ -53,12 +53,20 @@ def _risk_pill(risk: str) -> html.Span:
 
 def _menu_pill(value: str) -> html.Span:
     label = value if value and value != "None" else "None"
-    color = MENU_COLORS.get(label, "#334155")
-    return html.Span(
-        label,
-        className="risk-pill",
-        style={"backgroundColor": color},
-    )
+    style_map = MENU_COLORS.get(label)
+    if style_map:
+        style = {
+            "backgroundColor": style_map["bg"],
+            "color": style_map["text"],
+            "border": f"1px solid {style_map['border']}",
+        }
+    else:
+        style = {
+            "backgroundColor": "rgba(51, 65, 85, 0.15)",
+            "color": "#64748b",
+            "border": "1px solid rgba(51, 65, 85, 0.35)",
+        }
+    return html.Span(label, className="menu-pill", style=style)
 
 
 def _alternative_pill(is_alt: bool) -> html.Span:
@@ -667,8 +675,8 @@ def build_city_pivot_table(
                                     html.Th("Last Updated", className="pivot-th"),
                                     html.Th("Pax", className="pivot-th"),
                                     html.Th("Alternative Available", className="pivot-th"),
-                                    html.Th("Current Week Menu", className="pivot-th"),
-                                    html.Th("Next Week Menu", className="pivot-th"),
+                                    html.Th("Current Week Menu", className="pivot-th menu-th"),
+                                    html.Th("Next Week Menu", className="pivot-th menu-th"),
                                 ])
                             ),
                             html.Tbody(table_rows),
@@ -831,8 +839,8 @@ def build_alt_pivot_table(
                                     html.Th("Last Updated", className="pivot-th"),
                                     html.Th("PAX", className="pivot-th"),
                                     html.Th("Coverage Type", className="pivot-th"),
-                                    html.Th("Current Week Menu", className="pivot-th"),
-                                    html.Th("Next Week Menu", className="pivot-th"),
+                                    html.Th("Current Week Menu", className="pivot-th menu-th"),
+                                    html.Th("Next Week Menu", className="pivot-th menu-th"),
                                 ])
                             ),
                             html.Tbody(table_rows),
@@ -875,7 +883,7 @@ def build_combined_pivot_table(
                 className="pivot-group-row",
                 children=[
                     html.Td(
-                        colSpan=10,
+                        colSpan=9,
                         className="pivot-group-cell",
                         children=html.Div(
                             className="pivot-group-header",
@@ -896,8 +904,6 @@ def build_combined_pivot_table(
         )
 
         for idx, row in enumerate(rows):
-            risk = str(row.get("risk", ""))
-            live_days_color = RISK_COLORS.get(risk, "#e2e8f0")
             is_alt = bool(row.get("is_alternative", False))
             alt_type = str(row.get("alt_type", ""))
             city = str(row.get("region", ""))
@@ -924,12 +930,7 @@ def build_combined_pivot_table(
                         html.Td(city if idx == 0 else "", className="pivot-cell pivot-cell-dim"),
                         html.Td(client if idx == 0 else "", className="pivot-cell pivot-cell-dim"),
                         html.Td(str(row.get("vendor", "")), className="pivot-cell pivot-cell-strong"),
-                        html.Td(_risk_pill(risk), className="pivot-cell"),
-                        html.Td(
-                            _format_number(row.get("live_days", 0)),
-                            className="pivot-cell",
-                            style={"color": live_days_color, "fontWeight": "700"},
-                        ),
+                        html.Td(_format_number(row.get("live_days", 0)), className="pivot-cell"),
                         html.Td(str(row.get("last_updated", "")), className="pivot-cell pivot-cell-dim"),
                         html.Td(_format_number(row.get("pax", 0)), className="pivot-cell"),
                         source_cell,
@@ -942,7 +943,7 @@ def build_combined_pivot_table(
     if not table_rows:
         table_rows.append(
             html.Tr(children=[
-                html.Td("No records found.", colSpan=10, className="pivot-no-records")
+                html.Td("No records found.", colSpan=9, className="pivot-no-records")
             ])
         )
 
@@ -960,9 +961,9 @@ def build_combined_pivot_table(
                     html.Div(
                         className="pivot-section-title-wrap",
                         children=[
-                            html.Div(f"{selected_city} · Combined Vendor View", className="pivot-section-title"),
+                            html.Div("All Cities · Combined Vendor View", className="pivot-section-title"),
                             html.Div(
-                                "All LPG & alternative vendors for this city.",
+                                "All LPG & alternative vendors across all cities.",
                                 className="pivot-section-subtitle",
                             ),
                         ],
@@ -1000,13 +1001,12 @@ def build_combined_pivot_table(
                                     html.Th("City", className="pivot-th"),
                                     html.Th("Site", className="pivot-th"),
                                     html.Th("Vendor", className="pivot-th"),
-                                    html.Th("Risk", className="pivot-th"),
                                     html.Th("Live LPG Days", className="pivot-th"),
                                     html.Th("Last Updated", className="pivot-th"),
                                     html.Th("PAX", className="pivot-th"),
                                     html.Th("Source", className="pivot-th"),
-                                    html.Th("Current Week Menu", className="pivot-th"),
-                                    html.Th("Next Week Menu", className="pivot-th"),
+                                    html.Th("Current Week Menu", className="pivot-th menu-th"),
+                                    html.Th("Next Week Menu", className="pivot-th menu-th"),
                                 ])
                             ),
                             html.Tbody(table_rows),
