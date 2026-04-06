@@ -526,7 +526,18 @@ def build_alt_type_cards(type_summary: dict[str, Any], selected_type: str) -> li
 # -------------------------------------------------------------------
 # Unmatched vendor section (vendors in Siemens Vendor not in Siemens Client)
 # -------------------------------------------------------------------
-_UNMATCHED_COLS = 3  # Vendor Name | Days of Stock | Alternative Available
+_UNMATCHED_COLS = 3  # Vendor Name | Days of Stock | Coverage Type
+
+def _unmatched_alt_type(row: dict) -> str:
+    has_gail = str(row.get("gail_png", "")).strip().lower() == "yes"
+    has_elec = str(row.get("continuity", "")).strip().lower() == "yes"
+    if has_gail and has_elec:
+        return "Both"
+    if has_gail:
+        return "GAIL/PNG at Vendor"
+    if has_elec:
+        return "Electrical Equipment Availability"
+    return ""
 
 def build_unmatched_vendor_section(rows: list[dict]) -> html.Details:
     count = len(rows)
@@ -554,9 +565,9 @@ def build_unmatched_vendor_section(rows: list[dict]) -> html.Details:
     else:
         thead = html.Thead(
             html.Tr([
-                html.Th("Vendor Name",          className="pivot-th"),
-                html.Th("Days of Stock",        className="pivot-th"),
-                html.Th("Alternative Available", className="pivot-th"),
+                html.Th("Vendor Name",   className="pivot-th"),
+                html.Th("Days of Stock", className="pivot-th"),
+                html.Th("Coverage Type", className="pivot-th"),
             ])
         )
 
@@ -580,25 +591,29 @@ def build_unmatched_vendor_section(rows: list[dict]) -> html.Details:
 
             # Vendor rows under city
             for row in vendors:
-                alt = bool(row.get("is_alternative", False))
                 days = row.get("days_of_stock", 0)
                 try:
                     days_str = str(int(float(days)))
                 except (ValueError, TypeError):
                     days_str = "—"
+                alt_type = _unmatched_alt_type(row)
+                if alt_type:
+                    type_label = ALT_TYPE_SHORT_NAMES.get(alt_type, alt_type)
+                    type_color = ALT_TYPE_COLORS.get(alt_type, "#334155")
+                    coverage_cell = html.Span(
+                        type_label,
+                        className="alt-type-pill",
+                        style={"backgroundColor": type_color},
+                    )
+                else:
+                    coverage_cell = html.Span("No", className="continuity-pill continuity-no")
                 tbody_rows.append(
                     html.Tr(
                         className="pivot-data-row",
                         children=[
                             html.Td(str(row.get("vendor", "—")), className="pivot-cell pivot-cell-strong"),
                             html.Td(days_str,                    className="pivot-cell"),
-                            html.Td(
-                                html.Span(
-                                    "Yes" if alt else "No",
-                                    className=f"continuity-pill {'continuity-yes' if alt else 'continuity-no'}",
-                                ),
-                                className="pivot-cell",
-                            ),
+                            html.Td(coverage_cell,               className="pivot-cell"),
                         ],
                     )
                 )
