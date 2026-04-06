@@ -23,8 +23,8 @@ APP_DEBUG = True
 # DATA SOURCE
 # -------------------------------------------------------------------
 DATA_FILE_PATH = Path("data/lpg_stock_data.xlsx")
-VENDOR_SHEET_NAME = "Siemens Vendor"
-CLIENT_SHEET_NAME = "Siemens Client"
+VENDOR_SHEET_NAME = "Master Vendor Data"
+CLIENT_SHEET_NAME = "Master Client Data"
 
 
 # -------------------------------------------------------------------
