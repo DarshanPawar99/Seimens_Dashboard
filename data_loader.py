@@ -57,9 +57,11 @@ VENDOR_EXACT_COLUMNS = {
 CLIENT_EXACT_COLUMNS = {
     CANONICAL_VENDOR_ID: "Unique Vendor ID",
     CANONICAL_VENDOR: "Vendor Name",
-    CANONICAL_CLIENT: "Client Name",
+    CANONICAL_CLIENT: "Site Name",
     CANONICAL_PAX: "Total Pax Served through SQ (Only Offsite)",
 }
+
+ALLOWED_SITE_NAMES = {"siemensrga", "siemenstech", "siemenspune"}
 
 
 # -------------------------------------------------------------------
@@ -175,6 +177,11 @@ def clean_client_dataframe(df: pd.DataFrame) -> pd.DataFrame:
 
     cleaned = cleaned[cleaned[CANONICAL_VENDOR_ID].astype(str).str.strip() != ""]
     cleaned = cleaned[cleaned[CANONICAL_CLIENT].astype(str).str.strip() != ""]
+
+    # Filter to only the three Siemens sites
+    cleaned = cleaned[
+        cleaned[CANONICAL_CLIENT].astype(str).str.strip().str.lower().isin(ALLOWED_SITE_NAMES)
+    ]
 
     return cleaned.reset_index(drop=True)
 
