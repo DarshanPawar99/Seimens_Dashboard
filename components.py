@@ -589,7 +589,7 @@ def build_city_pivot_table(
         )
 
     summary_text = (
-        f"{len(pivot_groups)} clients · {_format_number(total_vendor_rows)} vendor rows · "
+        f"{len(pivot_groups)} sites · {_format_number(total_vendor_rows)} vendor rows · "
         f"{_format_number(total_pax_all)} total pax"
     )
 
@@ -611,7 +611,7 @@ def build_city_pivot_table(
                                         className="pivot-selected-risk-text",
                                         style={"color": RISK_COLORS.get(selected_risk, "#77a5ff")},
                                     ),
-                                    " vendors. One client can have multiple vendors.",
+                                    " vendors. One site can have multiple vendors.",
                                 ],
                                 className="pivot-section-subtitle",
                             ),
@@ -628,7 +628,7 @@ def build_city_pivot_table(
                                         id={"type": "pivot-search-input", "index": "main"},
                                         value=search_text,
                                         type="text",
-                                        placeholder="Search client or vendor…",
+                                        placeholder="Search site or vendor…",
                                         className="pivot-search-input",
                                         debounce=True,
                                     )
@@ -647,7 +647,7 @@ def build_city_pivot_table(
                         children=[
                             html.Thead(
                                 html.Tr(children=[
-                                    html.Th("Client", className="pivot-th"),
+                                    html.Th("Site", className="pivot-th"),
                                     html.Th("Vendor", className="pivot-th"),
                                     html.Th("Risk Category", className="pivot-th"),
                                     html.Th("Live LPG Days", className="pivot-th"),
@@ -749,7 +749,7 @@ def build_alt_pivot_table(
         )
 
     summary_text = (
-        f"{len(pivot_groups)} clients · {_format_number(total_vendor_rows)} vendor rows · "
+        f"{len(pivot_groups)} sites · {_format_number(total_vendor_rows)} vendor rows · "
         f"{_format_number(total_pax_all)} total pax"
     )
     type_color = ALT_TYPE_COLORS.get(selected_type, "#77a5ff")
@@ -772,7 +772,7 @@ def build_alt_pivot_table(
                                         className="pivot-selected-risk-text",
                                         style={"color": type_color if selected_type else "#77a5ff"},
                                     ),
-                                    " vendors. One vendor can serve multiple clients.",
+                                    " vendors. One vendor can serve multiple sites.",
                                 ],
                                 className="pivot-section-subtitle",
                             ),
@@ -789,7 +789,7 @@ def build_alt_pivot_table(
                                         id={"type": "alt-search-input", "index": "main"},
                                         value=search_text,
                                         type="text",
-                                        placeholder="Search client or vendor…",
+                                        placeholder="Search site or vendor…",
                                         className="pivot-search-input",
                                         debounce=True,
                                     )
@@ -808,7 +808,7 @@ def build_alt_pivot_table(
                         children=[
                             html.Thead(
                                 html.Tr(children=[
-                                    html.Th("Client", className="pivot-th"),
+                                    html.Th("Site", className="pivot-th"),
                                     html.Th("Vendor", className="pivot-th"),
                                     html.Th("Live LPG Days", className="pivot-th"),
                                     html.Th("Last Updated", className="pivot-th"),
@@ -924,7 +924,7 @@ def build_combined_pivot_table(
         )
 
     summary_text = (
-        f"{len(pivot_groups)} clients · {_format_number(total_vendor_rows)} vendor rows · "
+        f"{len(pivot_groups)} sites · {_format_number(total_vendor_rows)} vendor rows · "
         f"{_format_number(total_pax_all)} total pax"
     )
 
@@ -955,7 +955,7 @@ def build_combined_pivot_table(
                                         id=search_input_id,
                                         value=search_text,
                                         type="text",
-                                        placeholder="Search client or vendor…",
+                                        placeholder="Search site or vendor…",
                                         className="pivot-search-input",
                                         debounce=True,
                                     )
@@ -974,7 +974,7 @@ def build_combined_pivot_table(
                         children=[
                             html.Thead(
                                 html.Tr(children=[
-                                    html.Th("Client", className="pivot-th"),
+                                    html.Th("Site", className="pivot-th"),
                                     html.Th("Vendor", className="pivot-th"),
                                     html.Th("Risk", className="pivot-th"),
                                     html.Th("Live LPG Days", className="pivot-th"),
