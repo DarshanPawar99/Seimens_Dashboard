@@ -71,7 +71,7 @@ CLIENT_OPTIONAL_COLUMNS = {
     CANONICAL_NEXT_MENU:    "Next Week Menu",
 }
 
-ALLOWED_SITE_NAMES = {"siemensrga", "siemenstech", "siemenspune"}
+
 
 
 # -------------------------------------------------------------------
@@ -187,11 +187,6 @@ def clean_client_dataframe(df: pd.DataFrame) -> pd.DataFrame:
 
     cleaned = cleaned[cleaned[CANONICAL_VENDOR_ID].astype(str).str.strip() != ""]
     cleaned = cleaned[cleaned[CANONICAL_CLIENT].astype(str).str.strip() != ""]
-
-    # Filter to only the three Siemens sites
-    cleaned = cleaned[
-        cleaned[CANONICAL_CLIENT].astype(str).str.strip().str.lower().isin(ALLOWED_SITE_NAMES)
-    ]
 
     return cleaned.reset_index(drop=True)
 
