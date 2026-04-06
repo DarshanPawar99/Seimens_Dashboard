@@ -435,7 +435,6 @@ def build_combined_pivot_groups(
         key=lambda row: (
             str(row.get("region", "")),
             str(row.get("client", "")),
-            risk_sort_key(str(row.get("risk", "Safe"))),
             str(row.get("vendor", "")),
         )
     )
