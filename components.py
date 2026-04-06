@@ -577,8 +577,8 @@ def build_city_pivot_table(
                         html.Td(str(row.get("last_updated", "")), className="pivot-cell pivot-cell-dim"),
                         html.Td(_format_number(row.get("pax", 0)), className="pivot-cell"),
                         html.Td(_alternative_pill(bool(row.get("is_alternative", False))), className="pivot-cell"),
-                        html.Td(str(row.get("current_week_menu", "")), className="pivot-cell"),
-                        html.Td(str(row.get("next_week_menu", "")), className="pivot-cell"),
+                        html.Td(str(row.get("current_week_menu", "")) or "None", className="pivot-cell"),
+                        html.Td(str(row.get("next_week_menu", "")) or "None", className="pivot-cell"),
                     ],
                 )
             )
@@ -741,8 +741,8 @@ def build_alt_pivot_table(
                             html.Span(alt_type, className="alt-type-pill", style={"backgroundColor": type_color}),
                             className="pivot-cell",
                         ),
-                        html.Td(str(row.get("current_week_menu", "")), className="pivot-cell"),
-                        html.Td(str(row.get("next_week_menu", "")), className="pivot-cell"),
+                        html.Td(str(row.get("current_week_menu", "")) or "None", className="pivot-cell"),
+                        html.Td(str(row.get("next_week_menu", "")) or "None", className="pivot-cell"),
                     ],
                 )
             )
@@ -922,8 +922,8 @@ def build_combined_pivot_table(
                         html.Td(str(row.get("last_updated", "")), className="pivot-cell pivot-cell-dim"),
                         html.Td(_format_number(row.get("pax", 0)), className="pivot-cell"),
                         source_cell,
-                        html.Td(str(row.get("current_week_menu", "")), className="pivot-cell"),
-                        html.Td(str(row.get("next_week_menu", "")), className="pivot-cell"),
+                        html.Td(str(row.get("current_week_menu", "")) or "None", className="pivot-cell"),
+                        html.Td(str(row.get("next_week_menu", "")) or "None", className="pivot-cell"),
                     ],
                 )
             )
