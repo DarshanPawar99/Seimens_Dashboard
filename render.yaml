@@ -5,7 +5,7 @@ services:
     plan: free
     rootDir: .
     buildCommand: pip install -r requirements.txt
-    startCommand: sh -c 'gunicorn app:server --bind 0.0.0.0:${PORT:-10000}'
+    startCommand: gunicorn app:server --bind 0.0.0.0:$PORT --workers 1 --timeout 120
     healthCheckPath: /
     autoDeployTrigger: commit
     envVars:
