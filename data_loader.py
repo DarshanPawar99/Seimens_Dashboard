@@ -60,7 +60,7 @@ VENDOR_EXACT_COLUMNS = {
 CLIENT_EXACT_COLUMNS = {
     CANONICAL_VENDOR_ID: "Unique Vendor ID",
     CANONICAL_VENDOR:    "Vendor Name",
-    CANONICAL_CLIENT:    "Client Name",
+    CANONICAL_CLIENT:    "Site Name",
     CANONICAL_CITY:      "CITY",
     CANONICAL_PAX:       "Total Pax Served through SQ (Only Offsite)",
 }
