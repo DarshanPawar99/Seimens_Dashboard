@@ -960,9 +960,9 @@ def build_combined_pivot_table(
                     html.Div(
                         className="pivot-section-title-wrap",
                         children=[
-                            html.Div(f"{selected_city} · Combined Vendor View", className="pivot-section-title"),
+                            html.Div("All Cities · Combined Vendor View", className="pivot-section-title"),
                             html.Div(
-                                "All LPG & alternative vendors for this city.",
+                                "All LPG & alternative vendors across all cities.",
                                 className="pivot-section-subtitle",
                             ),
                         ],
