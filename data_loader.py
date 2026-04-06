@@ -3,8 +3,8 @@ data_loader.py
 
 Loads the LPG Stock Tracker workbook with 2 sheets:
 
-- Master Vendor Data
-- Master Client Data
+- Siemens Vendor
+- Siemens Client
 
 Business rules:
 - Join vendor and client sheets using Unique Vendor ID
@@ -21,6 +21,7 @@ from pathlib import Path
 import pandas as pd
 
 from config import (
+    CANONICAL_CITY,
     CANONICAL_CLIENT,
     CANONICAL_CONTINUITY,
     CANONICAL_CURRENT_MENU,
@@ -48,25 +49,26 @@ logger = setup_logger(__name__)
 # -------------------------------------------------------------------
 VENDOR_EXACT_COLUMNS = {
     CANONICAL_VENDOR_ID: "Unique Vendor ID",
-    CANONICAL_REGION: "Region",
-    CANONICAL_VENDOR: "Vendor Name",
+    CANONICAL_REGION:    "Region",
+    CANONICAL_VENDOR:    "Vendor Name",
     CANONICAL_DAYS_OF_STOCK: "Days of Stock",
-    CANONICAL_LAST_UPDATED: "Last Updated Date",
-    CANONICAL_GAIL_PNG: "GAIL/PNG at Vendor",
-    CANONICAL_CONTINUITY: "Electrical Equipment Availability",
+    CANONICAL_LAST_UPDATED:  "Last Updated Date",
+    CANONICAL_GAIL_PNG:      "GAIL/PNG at Vendor",
+    CANONICAL_CONTINUITY:    "Electrical Equipment Availability",
 }
 
 CLIENT_EXACT_COLUMNS = {
     CANONICAL_VENDOR_ID: "Unique Vendor ID",
-    CANONICAL_VENDOR: "Vendor Name",
-    CANONICAL_CLIENT: "Site Name",
-    CANONICAL_PAX: "Total Pax Served through SQ (Only Offsite)",
+    CANONICAL_VENDOR:    "Vendor Name",
+    CANONICAL_CLIENT:    "Client Name",
+    CANONICAL_CITY:      "CITY",
+    CANONICAL_PAX:       "Total Pax Served through SQ (Only Offsite)",
 }
 
 # Optional — loaded if present in the sheet, otherwise default to ""
 CLIENT_OPTIONAL_COLUMNS = {
     CANONICAL_CURRENT_MENU: "Current Week Menu",
-    CANONICAL_NEXT_MENU: "Next Week Menu",
+    CANONICAL_NEXT_MENU:    "Next Week Menu",
 }
 
 ALLOWED_SITE_NAMES = {"siemensrga", "siemenstech", "siemenspune"}
@@ -118,7 +120,7 @@ def standardize_client_columns(df: pd.DataFrame) -> pd.DataFrame:
 
     client_df = df.rename(columns={v: k for k, v in CLIENT_EXACT_COLUMNS.items()}).copy()
 
-    # Load optional columns if present, else fill with empty string
+    # Optional columns — load if present, else empty string
     for canonical, excel_name in CLIENT_OPTIONAL_COLUMNS.items():
         client_df[canonical] = df[excel_name].values if excel_name in df.columns else ""
 
@@ -126,6 +128,7 @@ def standardize_client_columns(df: pd.DataFrame) -> pd.DataFrame:
         CANONICAL_VENDOR_ID,
         CANONICAL_VENDOR,
         CANONICAL_CLIENT,
+        CANONICAL_CITY,
         CANONICAL_PAX,
         CANONICAL_CURRENT_MENU,
         CANONICAL_NEXT_MENU,
@@ -149,23 +152,16 @@ def clean_vendor_dataframe(df: pd.DataFrame) -> pd.DataFrame:
 
     cleaned[CANONICAL_VENDOR_ID] = _normalize_vendor_id(cleaned[CANONICAL_VENDOR_ID])
 
-    for col in [
-        CANONICAL_REGION,
-        CANONICAL_VENDOR,
-        CANONICAL_GAIL_PNG,
-        CANONICAL_CONTINUITY,
-    ]:
+    for col in [CANONICAL_REGION, CANONICAL_VENDOR, CANONICAL_GAIL_PNG, CANONICAL_CONTINUITY]:
         if col in cleaned.columns:
             cleaned[col] = cleaned[col].astype("string").fillna("").str.strip()
 
     cleaned[CANONICAL_DAYS_OF_STOCK] = pd.to_numeric(
-        cleaned[CANONICAL_DAYS_OF_STOCK],
-        errors="coerce",
+        cleaned[CANONICAL_DAYS_OF_STOCK], errors="coerce",
     ).fillna(0)
 
     cleaned[CANONICAL_LAST_UPDATED] = pd.to_datetime(
-        cleaned[CANONICAL_LAST_UPDATED],
-        errors="coerce",
+        cleaned[CANONICAL_LAST_UPDATED], errors="coerce",
     )
 
     cleaned = cleaned.dropna(subset=[CANONICAL_LAST_UPDATED])
@@ -181,12 +177,12 @@ def clean_client_dataframe(df: pd.DataFrame) -> pd.DataFrame:
 
     cleaned[CANONICAL_VENDOR_ID] = _normalize_vendor_id(cleaned[CANONICAL_VENDOR_ID])
 
-    for col in [CANONICAL_VENDOR, CANONICAL_CLIENT, CANONICAL_CURRENT_MENU, CANONICAL_NEXT_MENU]:
+    for col in [CANONICAL_VENDOR, CANONICAL_CLIENT, CANONICAL_CITY,
+                CANONICAL_CURRENT_MENU, CANONICAL_NEXT_MENU]:
         cleaned[col] = cleaned[col].astype("string").fillna("").str.strip()
 
     cleaned[CANONICAL_PAX] = pd.to_numeric(
-        cleaned[CANONICAL_PAX],
-        errors="coerce",
+        cleaned[CANONICAL_PAX], errors="coerce",
     ).fillna(0)
 
     cleaned = cleaned[cleaned[CANONICAL_VENDOR_ID].astype(str).str.strip() != ""]
@@ -261,6 +257,7 @@ def merge_client_vendor_data(client_df: pd.DataFrame, vendor_df: pd.DataFrame) -
         CANONICAL_VENDOR_ID,
         CANONICAL_VENDOR,
         CANONICAL_CLIENT,
+        CANONICAL_CITY,
         CANONICAL_REGION,
         CANONICAL_PAX,
         CANONICAL_DAYS_OF_STOCK,
@@ -281,7 +278,7 @@ def merge_client_vendor_data(client_df: pd.DataFrame, vendor_df: pd.DataFrame) -
 def load_dashboard_data(file_path: str | Path = DATA_FILE_PATH) -> pd.DataFrame:
     empty = pd.DataFrame(columns=[
         CANONICAL_VENDOR_ID, CANONICAL_VENDOR, CANONICAL_CLIENT,
-        CANONICAL_REGION, CANONICAL_PAX, CANONICAL_DAYS_OF_STOCK,
+        CANONICAL_CITY, CANONICAL_REGION, CANONICAL_PAX, CANONICAL_DAYS_OF_STOCK,
         CANONICAL_LAST_UPDATED, CANONICAL_GAIL_PNG, CANONICAL_CONTINUITY,
         CANONICAL_IS_ALTERNATIVE, CANONICAL_CURRENT_MENU, CANONICAL_NEXT_MENU,
     ])

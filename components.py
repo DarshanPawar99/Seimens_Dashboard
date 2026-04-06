@@ -853,8 +853,11 @@ def build_alt_pivot_table(
 
 
 # -------------------------------------------------------------------
-# Combined pivot table (LPG + Alternative vendors merged)
+# Combined pivot table — 3-level: City → Client → Vendor rows
 # -------------------------------------------------------------------
+_COMBINED_COLS = 7  # Vendor | Live LPG Days | Last Updated | PAX | Source | Curr Menu | Next Menu
+
+
 def build_combined_pivot_table(
     selected_city: str,
     pivot_groups: list[dict[str, Any]],
@@ -869,66 +872,83 @@ def build_combined_pivot_table(
     search_input_id = {"type": "combined-search-input", "index": search_index}
 
     table_rows: list[html.Tr] = []
-    total_vendor_rows = sum(g.get("vendor_count", 0) for g in pivot_groups)
-    total_pax_all = sum(g.get("total_pax", 0) for g in pivot_groups)
+    total_cities = len(pivot_groups)
+    total_clients = sum(len(cg.get("clients", [])) for cg in pivot_groups)
+    total_vendors = sum(cg.get("city_vendor_count", 0) for cg in pivot_groups)
+    total_pax_all = sum(cg.get("city_total_pax", 0) for cg in pivot_groups)
 
-    for group in pivot_groups:
-        client = str(group.get("client", ""))
-        rows = group.get("rows", [])
-        total_pax = group.get("total_pax", 0)
-        vendor_count = group.get("vendor_count", len(rows))
+    for city_group in pivot_groups:
+        city            = str(city_group.get("city", ""))
+        city_pax        = city_group.get("city_total_pax", 0)
+        city_vend_count = city_group.get("city_vendor_count", 0)
 
-        table_rows.append(
-            html.Tr(
+        # ── Level 1: City header ──────────────────────────────────────
+        table_rows.append(html.Tr(
+            className="pivot-city-row",
+            children=[html.Td(
+                colSpan=_COMBINED_COLS,
+                className="pivot-city-cell",
+                children=html.Div(
+                    className="pivot-group-header",
+                    children=[
+                        html.Div(className="pivot-group-title-wrap", children=[
+                            html.Span("▾", className="pivot-group-arrow"),
+                            html.Span(city, className="pivot-city-title"),
+                        ]),
+                        html.Div(className="pivot-group-badges", children=[
+                            html.Span(f"{_format_number(city_vend_count)} vendors", className="pivot-badge"),
+                            html.Span(f"{_format_number(city_pax)} pax", className="pivot-badge"),
+                        ]),
+                    ],
+                ),
+            )],
+        ))
+
+        for client_group in city_group.get("clients", []):
+            client       = str(client_group.get("client", ""))
+            client_pax   = client_group.get("total_pax", 0)
+            vendor_count = client_group.get("vendor_count", 0)
+            rows         = client_group.get("rows", [])
+
+            # ── Level 2: Client sub-header ────────────────────────────
+            table_rows.append(html.Tr(
                 className="pivot-group-row",
-                children=[
-                    html.Td(
-                        colSpan=9,
-                        className="pivot-group-cell",
-                        children=html.Div(
-                            className="pivot-group-header",
-                            children=[
-                                html.Div(className="pivot-group-title-wrap", children=[
-                                    html.Span("▸", className="pivot-group-arrow"),
-                                    html.Span(client, className="pivot-group-title"),
-                                ]),
-                                html.Div(className="pivot-group-badges", children=[
-                                    html.Span(f"{_format_number(vendor_count)} vendors", className="pivot-badge"),
-                                    html.Span(f"{_format_number(total_pax)} pax", className="pivot-badge"),
-                                ]),
-                            ],
-                        ),
-                    )
-                ],
-            )
-        )
+                children=[html.Td(
+                    colSpan=_COMBINED_COLS,
+                    className="pivot-group-cell pivot-client-cell",
+                    children=html.Div(
+                        className="pivot-group-header",
+                        children=[
+                            html.Div(className="pivot-group-title-wrap", children=[
+                                html.Span("▸", className="pivot-group-arrow"),
+                                html.Span(client, className="pivot-group-title"),
+                            ]),
+                            html.Div(className="pivot-group-badges", children=[
+                                html.Span(f"{_format_number(vendor_count)} vendors", className="pivot-badge"),
+                                html.Span(f"{_format_number(client_pax)} pax", className="pivot-badge"),
+                            ]),
+                        ],
+                    ),
+                )],
+            ))
 
-        for idx, row in enumerate(rows):
-            is_alt = bool(row.get("is_alternative", False))
-            alt_type = str(row.get("alt_type", ""))
-            city = str(row.get("region", ""))
+            # ── Level 3: Vendor data rows ─────────────────────────────
+            for row in rows:
+                is_alt   = bool(row.get("is_alternative", False))
+                alt_type = str(row.get("alt_type", ""))
 
-            if is_alt:
                 source_cell = html.Td(
                     html.Span(
                         alt_type or "Alternative",
                         className="alt-type-pill",
                         style={"backgroundColor": ALT_TYPE_COLORS.get(alt_type, "#334155")},
-                    ),
-                    className="pivot-cell",
-                )
-            else:
-                source_cell = html.Td(
-                    html.Span("No Alternative", className="source-pill-no-alt"),
+                    ) if is_alt else html.Span("No Alternative", className="source-pill-no-alt"),
                     className="pivot-cell",
                 )
 
-            table_rows.append(
-                html.Tr(
+                table_rows.append(html.Tr(
                     className="pivot-data-row",
                     children=[
-                        html.Td(city if idx == 0 else "", className="pivot-cell pivot-cell-dim"),
-                        html.Td(client if idx == 0 else "", className="pivot-cell pivot-cell-dim"),
                         html.Td(str(row.get("vendor", "")), className="pivot-cell pivot-cell-strong"),
                         html.Td(_format_number(row.get("live_days", 0)), className="pivot-cell"),
                         html.Td(str(row.get("last_updated", "")), className="pivot-cell pivot-cell-dim"),
@@ -937,19 +957,16 @@ def build_combined_pivot_table(
                         html.Td(_menu_pill(str(row.get("current_week_menu", ""))), className="pivot-cell"),
                         html.Td(_menu_pill(str(row.get("next_week_menu", ""))), className="pivot-cell"),
                     ],
-                )
-            )
+                ))
 
     if not table_rows:
-        table_rows.append(
-            html.Tr(children=[
-                html.Td("No records found.", colSpan=9, className="pivot-no-records")
-            ])
-        )
+        table_rows.append(html.Tr(children=[
+            html.Td("No records found.", colSpan=_COMBINED_COLS, className="pivot-no-records")
+        ]))
 
     summary_text = (
-        f"{len(pivot_groups)} sites · {_format_number(total_vendor_rows)} vendor rows · "
-        f"{_format_number(total_pax_all)} total pax"
+        f"{total_cities} cities · {total_clients} sites · "
+        f"{_format_number(total_vendors)} vendor rows · {_format_number(total_pax_all)} total pax"
     )
 
     return html.Div(
@@ -963,7 +980,7 @@ def build_combined_pivot_table(
                         children=[
                             html.Div("All Cities · Combined Vendor View", className="pivot-section-title"),
                             html.Div(
-                                "All LPG & alternative vendors across all cities.",
+                                "Full dataset — City → Site → Vendor",
                                 className="pivot-section-subtitle",
                             ),
                         ],
@@ -979,7 +996,7 @@ def build_combined_pivot_table(
                                         id=search_input_id,
                                         value=search_text,
                                         type="text",
-                                        placeholder="Search site or vendor…",
+                                        placeholder="Search city, site or vendor…",
                                         className="pivot-search-input",
                                         debounce=True,
                                     )
@@ -996,19 +1013,15 @@ def build_combined_pivot_table(
                     html.Table(
                         className="pivot-table",
                         children=[
-                            html.Thead(
-                                html.Tr(children=[
-                                    html.Th("City", className="pivot-th"),
-                                    html.Th("Site", className="pivot-th"),
-                                    html.Th("Vendor", className="pivot-th"),
-                                    html.Th("Live LPG Days", className="pivot-th"),
-                                    html.Th("Last Updated", className="pivot-th"),
-                                    html.Th("PAX", className="pivot-th"),
-                                    html.Th("Source", className="pivot-th"),
-                                    html.Th("Current Week Menu", className="pivot-th menu-th"),
-                                    html.Th("Next Week Menu", className="pivot-th menu-th"),
-                                ])
-                            ),
+                            html.Thead(html.Tr(children=[
+                                html.Th("Vendor",           className="pivot-th"),
+                                html.Th("Live LPG Days",   className="pivot-th"),
+                                html.Th("Last Updated",    className="pivot-th"),
+                                html.Th("PAX",             className="pivot-th"),
+                                html.Th("Source",          className="pivot-th"),
+                                html.Th("Current Week Menu", className="pivot-th menu-th"),
+                                html.Th("Next Week Menu",    className="pivot-th menu-th"),
+                            ])),
                             html.Tbody(table_rows),
                         ],
                     )

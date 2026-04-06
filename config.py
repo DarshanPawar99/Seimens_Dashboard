@@ -23,8 +23,8 @@ APP_DEBUG = True
 # DATA SOURCE
 # -------------------------------------------------------------------
 DATA_FILE_PATH = Path("data/lpg_stock_data.xlsx")
-VENDOR_SHEET_NAME = "Master Vendor Data"
-CLIENT_SHEET_NAME = "Master Client Data"
+VENDOR_SHEET_NAME = "Siemens Vendor"
+CLIENT_SHEET_NAME = "Siemens Client"
 
 
 # -------------------------------------------------------------------
@@ -116,6 +116,7 @@ EXCLUDED_GAIL_PNG_VALUES = {"yes"}
 CANONICAL_VENDOR_ID = "vendor_id"
 CANONICAL_VENDOR = "vendor"
 CANONICAL_CLIENT = "client"
+CANONICAL_CITY = "city"
 CANONICAL_REGION = "region"
 CANONICAL_PAX = "pax"
 CANONICAL_DAYS_OF_STOCK = "days_of_stock"

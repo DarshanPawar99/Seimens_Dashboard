@@ -102,6 +102,7 @@ def enrich_dashboard_rows(df: pd.DataFrame, selected_date: date) -> list[dict[st
                 "id": int(idx) + 1,
                 "vendor": str(row.get("vendor", "")).strip(),
                 "client": str(row.get("client", "")).strip(),
+                "city": str(row.get("city", "")).strip(),
                 "region": str(row.get("region", "")).strip(),
                 "pax": float(row.get("pax", 0) or 0),
                 "days_of_stock": days_of_stock,
@@ -420,46 +421,60 @@ def build_combined_pivot_groups(
     selected_city: str = "",
     search_text: str = "",
 ) -> list[dict[str, Any]]:
-    """All vendors (LPG + alternative) across all cities, grouped by client."""
-    city_rows = list(enriched_rows)
+    """
+    Full dataset grouped as city → client → vendor rows.
+    Returns a list of city-level dicts, each containing a list of client-level dicts.
+    """
+    rows = list(enriched_rows)
 
     if search_text:
         needle = search_text.strip().lower()
-        city_rows = [
-            row for row in city_rows
-            if needle in str(row.get("client", "")).lower()
-            or needle in str(row.get("vendor", "")).lower()
+        rows = [
+            r for r in rows
+            if needle in str(r.get("client", "")).lower()
+            or needle in str(r.get("vendor", "")).lower()
+            or needle in str(r.get("city", "")).lower()
         ]
 
-    city_rows.sort(
-        key=lambda row: (
-            str(row.get("region", "")),
-            str(row.get("client", "")),
-            str(row.get("vendor", "")),
-        )
-    )
-
-    enriched: list[dict[str, Any]] = []
-    for row in city_rows:
-        if row.get("is_alternative"):
-            enriched.append({**row, "alt_type": _get_alt_type(row)})
-        else:
-            enriched.append({**row, "alt_type": ""})
-
-    grouped: dict[str, list[dict[str, Any]]] = {}
-    for row in enriched:
-        client = str(row.get("client", "")).strip()
-        grouped.setdefault(client, []).append(row)
-
-    return [
-        {
-            "client": client,
-            "rows": rows,
-            "total_pax": sum(float(r.get("pax", 0) or 0) for r in rows),
-            "vendor_count": len(rows),
-        }
-        for client, rows in grouped.items()
+    # Enrich with alt_type
+    rows = [
+        {**r, "alt_type": _get_alt_type(r)} if r.get("is_alternative") else {**r, "alt_type": ""}
+        for r in rows
     ]
+
+    # Sort: city → client → vendor
+    rows.sort(key=lambda r: (
+        str(r.get("city", "")),
+        str(r.get("client", "")),
+        str(r.get("vendor", "")),
+    ))
+
+    # Build nested structure: city → {client → [rows]}
+    city_map: dict[str, dict[str, list[dict[str, Any]]]] = {}
+    for row in rows:
+        city   = str(row.get("city", "")).strip()
+        client = str(row.get("client", "")).strip()
+        city_map.setdefault(city, {}).setdefault(client, []).append(row)
+
+    result: list[dict[str, Any]] = []
+    for city, client_map in city_map.items():
+        clients: list[dict[str, Any]] = [
+            {
+                "client": client,
+                "rows": client_rows,
+                "total_pax": sum(float(r.get("pax", 0) or 0) for r in client_rows),
+                "vendor_count": len(client_rows),
+            }
+            for client, client_rows in client_map.items()
+        ]
+        result.append({
+            "city": city,
+            "clients": clients,
+            "city_total_pax":     sum(c["total_pax"]    for c in clients),
+            "city_vendor_count":  sum(c["vendor_count"] for c in clients),
+        })
+
+    return result
 
 
 def build_alt_pivot_groups(

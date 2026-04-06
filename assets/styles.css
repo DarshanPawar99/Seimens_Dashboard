@@ -731,6 +731,25 @@ input#selected-date-input::-webkit-calendar-picker-indicator {
   text-align: left;
 }
 
+/* City-level header (outermost level in combined view) */
+.pivot-city-row {
+  border-top: 2px solid var(--border-strong);
+  background: #060e22;
+}
+
+.pivot-city-cell {
+  padding: 14px 20px;
+}
+
+.pivot-city-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* Client-level sub-header (second level in combined view) */
 .pivot-group-row {
   border-top: 1px solid var(--border-soft);
   background: #0a152d;
