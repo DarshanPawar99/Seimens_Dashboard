@@ -128,6 +128,16 @@ CANONICAL_NEXT_MENU = "next_week_menu"
 
 
 # -------------------------------------------------------------------
+# MENU STATUS COLORS
+# -------------------------------------------------------------------
+MENU_COLORS = {
+    "BAU":        "#22c55e",   # green  — best / normal operations
+    "Restricted": "#eab308",   # yellow — limited / constrained
+    "BCP":        "#ef4444",   # red    — low / business continuity plan
+}
+
+
+# -------------------------------------------------------------------
 # OPTIONAL FUTURE SETTINGS
 # -------------------------------------------------------------------
 USE_SAMPLE_FALLBACK_DATA = False

@@ -22,6 +22,7 @@ from config import (
     ALT_TYPE_SHORT_NAMES,
     ALT_TYPE_SUBTITLES,
     MAX_SELECTABLE_DATE,
+    MENU_COLORS,
     MIN_SELECTABLE_DATE,
     RISK_COLORS,
     RISK_SUBTITLES,
@@ -47,6 +48,16 @@ def _risk_pill(risk: str) -> html.Span:
         risk,
         className="risk-pill",
         style={"backgroundColor": RISK_COLORS.get(risk, "#334155")},
+    )
+
+
+def _menu_pill(value: str) -> html.Span:
+    label = value if value and value != "None" else "None"
+    color = MENU_COLORS.get(label, "#334155")
+    return html.Span(
+        label,
+        className="risk-pill",
+        style={"backgroundColor": color},
     )
 
 
@@ -577,8 +588,8 @@ def build_city_pivot_table(
                         html.Td(str(row.get("last_updated", "")), className="pivot-cell pivot-cell-dim"),
                         html.Td(_format_number(row.get("pax", 0)), className="pivot-cell"),
                         html.Td(_alternative_pill(bool(row.get("is_alternative", False))), className="pivot-cell"),
-                        html.Td(str(row.get("current_week_menu", "")) or "None", className="pivot-cell"),
-                        html.Td(str(row.get("next_week_menu", "")) or "None", className="pivot-cell"),
+                        html.Td(_menu_pill(str(row.get("current_week_menu", ""))), className="pivot-cell"),
+                        html.Td(_menu_pill(str(row.get("next_week_menu", ""))), className="pivot-cell"),
                     ],
                 )
             )
@@ -741,8 +752,8 @@ def build_alt_pivot_table(
                             html.Span(alt_type, className="alt-type-pill", style={"backgroundColor": type_color}),
                             className="pivot-cell",
                         ),
-                        html.Td(str(row.get("current_week_menu", "")) or "None", className="pivot-cell"),
-                        html.Td(str(row.get("next_week_menu", "")) or "None", className="pivot-cell"),
+                        html.Td(_menu_pill(str(row.get("current_week_menu", ""))), className="pivot-cell"),
+                        html.Td(_menu_pill(str(row.get("next_week_menu", ""))), className="pivot-cell"),
                     ],
                 )
             )
@@ -922,8 +933,8 @@ def build_combined_pivot_table(
                         html.Td(str(row.get("last_updated", "")), className="pivot-cell pivot-cell-dim"),
                         html.Td(_format_number(row.get("pax", 0)), className="pivot-cell"),
                         source_cell,
-                        html.Td(str(row.get("current_week_menu", "")) or "None", className="pivot-cell"),
-                        html.Td(str(row.get("next_week_menu", "")) or "None", className="pivot-cell"),
+                        html.Td(_menu_pill(str(row.get("current_week_menu", ""))), className="pivot-cell"),
+                        html.Td(_menu_pill(str(row.get("next_week_menu", ""))), className="pivot-cell"),
                     ],
                 )
             )
