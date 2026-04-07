@@ -205,7 +205,7 @@ def build_alternative_client_summary(enriched_rows: list[dict[str, Any]]) -> dic
     return {
         "title": "Cafeteria Under Alternative Sources of Energy",
         "value": _unique_count(alt, "client"),
-        "subtitle": "Site with atleast one vendor having alter source of energy",
+        "subtitle": "Site with atleast one vendor having alternate source of energy.",
     }
 
 
