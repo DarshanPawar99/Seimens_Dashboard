@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: seimens-dashboard
+    name: siemens-dashboard
     runtime: python
     plan: free
     rootDir: .
