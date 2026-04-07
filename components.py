@@ -1062,7 +1062,11 @@ def build_combined_pivot_table(
                     className="pivot-data-row",
                     children=[
                         html.Td(str(row.get("vendor", "")), className="pivot-cell pivot-cell-strong"),
-                        html.Td(_format_number(row.get("live_days", 0)), className="pivot-cell"),
+                        html.Td(
+                            _format_number(row.get("live_days", 0)),
+                            className="pivot-cell pivot-cell-strong",
+                            style={"color": row.get("risk_color", "inherit")},
+                        ),
                         html.Td(str(row.get("last_updated", "")), className="pivot-cell pivot-cell-dim"),
                         html.Td(_format_number(row.get("pax", 0)), className="pivot-cell"),
                         source_cell,
