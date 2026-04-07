@@ -165,7 +165,7 @@ def build_vendor_risk_summary(enriched_rows: list[dict[str, Any]]) -> dict[str, 
     counts = _count_by_risk(vendors)
 
     return {
-        "title": "Vendors with LPG",
+        "title": "Vendor's with LPG",
         "value": len(vendors),
         "subtitle": "Vendors without GAIL/PNG or Elec. Equipment",
         **counts,
@@ -203,7 +203,7 @@ def build_alternative_client_summary(enriched_rows: list[dict[str, Any]]) -> dic
     """Unique clients served by at least one alternative vendor. No risk dots."""
     alt = _alt_rows(enriched_rows)
     return {
-        "title": "Cafeteria Under Alternative Sources of Energy",
+        "title": "Cafeteria's Under Alternative Sources of Energy",
         "value": _unique_count(alt, "client"),
         "subtitle": "Site with atleast one vendor having alternate source of energy.",
     }
