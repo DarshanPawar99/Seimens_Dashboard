@@ -606,7 +606,7 @@ def build_unmatched_vendor_section(rows: list[dict]) -> html.Details:
                         style={"backgroundColor": type_color},
                     )
                 else:
-                    coverage_cell = html.Span("No", className="continuity-pill continuity-no")
+                    coverage_cell = html.Span("LPG", className="continuity-pill continuity-no")
                 tbody_rows.append(
                     html.Tr(
                         className="pivot-data-row",
